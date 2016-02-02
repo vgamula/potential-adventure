@@ -1,11 +1,15 @@
-(ns potential-adventure.core)
+(ns potential-adventure.core
+  (:use org.httpkit.server
+        (compojure [core :only [defroutes GET]]
+                   [handler :only [site]]
+                   [route :only [not-found]])))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn vova-handler [request]
+  "Hello, Vova!")
+
+(defroutes routes
+  (GET "/vova" [] vova-handler))
 
 
-(defn -main
-  []
-  (println "Hello, World!"))
+(defn -main [& args]
+  (run-server (-> #'routes site) {:port 3000}))
