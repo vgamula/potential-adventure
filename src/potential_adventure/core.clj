@@ -2,16 +2,27 @@
   (:gen-class)
   (:use org.httpkit.server
         [taoensso.timbre :as log]
+        [clojure.data.json :only [read-json]]
         (compojure [core :only [defroutes GET]]
                    [handler :only [site]]
                    [route :only [not-found files]])))
 
-(defn request-demo-handler [request]
-  (-> (log/info "get /request-demo-handler")
-      (str request)))
+
+(defn msg-received [msg]
+  (let [data (read-json msg)]
+    (log/info "msg reeived" data)))
+
+
+(defn ws-handler [request]
+  (with-channel request channel
+    (log/info channel "connected")
+    (on-receive channel #'msg-received)
+    (on-close channel (fn [status]
+                        (log/info "Channel closed" status)))))
+
 
 (defroutes routes
-  (GET "/request-demo-handler" request (request-demo-handler request))
+  (GET "/ws" request (ws-handler request))
   (files "" {:root "static"}))
 
 
