@@ -8,15 +8,15 @@
                    [route :only [not-found files]])))
 
 
-(defn msg-received [msg]
+(defn msg-received [channel msg]
   (let [data (read-json msg)]
-    (log/info "msg reeived" data)))
+    (log/info "msg reeived" data "from" channel)))
 
 
 (defn ws-handler [request]
   (with-channel request channel
     (log/info channel "connected")
-    (on-receive channel #'msg-received)
+    (on-receive channel (partial msg-received channel))
     (on-close channel (fn [status]
                         (log/info "Channel closed" status)))))
 
