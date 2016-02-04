@@ -1,28 +1,16 @@
 (ns potential-adventure.core
   (:gen-class)
   (:use org.httpkit.server
+        [potential-adventure.handlers :as handlers]
         [taoensso.timbre :as log]
         [clojure.data.json :only [read-json]]
         (compojure [core :only [defroutes GET]]
                    [handler :only [site]]
-                   [route :only [not-found files]])))
-
-
-(defn msg-received [channel msg]
-  (let [data (read-json msg)]
-    (log/info "msg reeived" data "from" channel)))
-
-
-(defn ws-handler [request]
-  (with-channel request channel
-    (log/info channel "connected")
-    (on-receive channel (partial msg-received channel))
-    (on-close channel (fn [status]
-                        (log/info "Channel closed" status)))))
+                   [route :only [not-found files]]))) 
 
 
 (defroutes routes
-  (GET "/ws" request (ws-handler request))
+  (GET "/ws" request (handlers/main-ws-handler request))
   (files "" {:root "static"}))
 
 
